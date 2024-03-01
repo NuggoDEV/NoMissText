@@ -1,39 +1,39 @@
-﻿using HarmonyLib;
-using IPA;
-using IPA.Config;
+﻿using IPA;
 using IPA.Config.Stores;
-using System.Reflection;
-using IPALogger = IPA.Logging.Logger;
-using BeatSaberMarkupLanguage.GameplaySetup;
 using NoMissText.UI;
+using IPALogger = IPA.Logging.Logger;
+using HarmonyLib;
+using BeatSaberMarkupLanguage.GameplaySetup;
 
 namespace NoMissText
 {
     [Plugin(RuntimeOptions.DynamicInit)]
-    internal class Plugin
+    public class Plugin
     {
-        internal static Harmony harmony;
+        internal static IPALogger Log { get; private set; }
+        internal static Harmony harmony { get; private set; }
 
         [Init]
-        public Plugin(IPALogger pluginLogger, Config config)
+        public Plugin(IPALogger logger, IPA.Config.Config conf)
         {
-            Logger.logger = pluginLogger;
-            NoMissTextConfig.Instance = config.Generated<NoMissTextConfig>();
-        }
-
-        [OnEnable]
-        public void OnEnable()
-        {
+            Log = logger;
+            NoMissTextConfig.Instance = conf.Generated<NoMissTextConfig>();
             harmony = new Harmony("com.CyanSnow.BeatSaber.NoMissText");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-            GameplaySetup.instance.AddTab("No Miss Text", "NoMissText.UI.settings.bsml", NoMissTextUI.instance);
         }
 
-        [OnDisable]
-        public void OnDisable()
+        [OnStart]
+        public void OnApplicationStart()
         {
-            harmony.UnpatchAll("com.CyanSnow.BeatSaber.NoMissText");
+            harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
+            GameplaySetup.instance.AddTab("No Miss Text", "NoMissText.UI.settings.bsml", new NoMissTextUI());
+        }
+
+        [OnExit]
+        public void OnApplicationQuit()
+        {
+            harmony.UnpatchSelf();
             GameplaySetup.instance.RemoveTab("No Miss Text");
         }
+
     }
 }

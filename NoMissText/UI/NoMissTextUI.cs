@@ -1,7 +1,8 @@
-﻿namespace NoMissText.UI
+﻿using BeatSaberMarkupLanguage.Attributes;
+
+namespace NoMissText.UI
 {
-    using BeatSaberMarkupLanguage.Attributes;
-    internal class NoMissTextUI : PersistentSingleton<NoMissTextUI>
+    internal class NoMissTextUI
     {
         [UIValue("hidemisstext")]
         public bool HideMissText

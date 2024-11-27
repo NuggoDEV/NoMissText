@@ -4,6 +4,7 @@ using NoMissText.UI;
 using IPALogger = IPA.Logging.Logger;
 using HarmonyLib;
 using BeatSaberMarkupLanguage.GameplaySetup;
+using BeatSaberMarkupLanguage.Util;
 
 namespace NoMissText
 {
@@ -22,17 +23,26 @@ namespace NoMissText
         }
 
         [OnStart]
-        public void OnApplicationStart()
+        async public void OnApplicationStart()
         {
+            await MainMenuAwaiter.WaitForMainMenuAsync();
+            MainMenuAwaiter.MainMenuInitializing += reinitializeSettings;
+
             harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
-            GameplaySetup.instance.AddTab("No Miss Text", "NoMissText.UI.settings.bsml", new NoMissTextUI());
+            
+            reinitializeSettings();
+        }
+
+        private void reinitializeSettings()
+        {
+            GameplaySetup.Instance.AddTab("No Miss Text", "NoMissText.UI.settings.bsml", new NoMissTextUI());
         }
 
         [OnExit]
         public void OnApplicationQuit()
         {
             harmony.UnpatchSelf();
-            GameplaySetup.instance.RemoveTab("No Miss Text");
+            GameplaySetup.Instance.RemoveTab("No Miss Text");
         }
 
     }
